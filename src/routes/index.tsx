@@ -167,7 +167,7 @@ function Resultado({ r }: { r: Aso["resultado"] }) {
   return <span className={`rounded-full px-2.5 py-0.5 text-sm font-medium ${cls}`}>{r}</span>;
 }
 
-function Campo({ id, label, erro, ...props }: { id: string; label: string; erro?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Campo({ id, label, erro, ...props }: { id: string; label: string; erro?: string | undefined } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
@@ -180,7 +180,7 @@ function Campo({ id, label, erro, ...props }: { id: string; label: string; erro?
 
 function FormPaciente({ existentes, onSalvar }: { existentes: Paciente[]; onSalvar: (p: Paciente) => void }) {
   const [f, setF] = useState({ nome: "", cpf: "", nascimento: "", email: "", empresa: "", telefone: "" });
-  const [erros, setErros] = useState<Record<string, string>>({});
+  const [erros, setErros] = useState<Partial<Record<string, string>>>({});
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, [k]: k === "cpf" ? formatarCpf(e.target.value) : e.target.value });
   return (
@@ -189,14 +189,14 @@ function FormPaciente({ existentes, onSalvar }: { existentes: Paciente[]; onSalv
       <p className="mb-6 text-muted-foreground">Campos com * são obrigatórios.</p>
       <form noValidate className="grid gap-4 rounded-xl border bg-card p-6 sm:grid-cols-2" onSubmit={(e) => {
         e.preventDefault();
-        const er = validarPaciente(f, existentes) as Record<string, string>;
+        const er = validarPaciente(f, existentes) as Partial<Record<string, string>>;
         setErros(er);
         if (!Object.keys(er).length) onSalvar({ ...f, id: uid() });
       }}>
-        <div className="sm:col-span-2"><Campo id="nome" label="Nome completo *" value={f.nome} onChange={set("nome")} erro={erros.nome} /></div>
-        <Campo id="cpf" label="CPF *" inputMode="numeric" placeholder="000.000.000-00" value={f.cpf} onChange={set("cpf")} erro={erros.cpf} />
-        <Campo id="nasc" label="Data de nascimento *" type="date" value={f.nascimento} onChange={set("nascimento")} erro={erros.nascimento} />
-        <Campo id="email" label="E-mail *" type="email" value={f.email} onChange={set("email")} erro={erros.email} />
+        <div className="sm:col-span-2"><Campo id="nome" label="Nome completo *" value={f.nome} onChange={set("nome")} erro={erros["nome"]} /></div>
+        <Campo id="cpf" label="CPF *" inputMode="numeric" placeholder="000.000.000-00" value={f.cpf} onChange={set("cpf")} erro={erros["cpf"]} />
+        <Campo id="nasc" label="Data de nascimento *" type="date" value={f.nascimento} onChange={set("nascimento")} erro={erros["nascimento"]} />
+        <Campo id="email" label="E-mail *" type="email" value={f.email} onChange={set("email")} erro={erros["email"]} />
         <Campo id="tel" label="Telefone" value={f.telefone} onChange={set("telefone")} />
         <div className="sm:col-span-2"><Campo id="emp" label="Empresa" value={f.empresa} onChange={set("empresa")} /></div>
         <div className="sm:col-span-2"><Button type="submit" size="lg">Cadastrar paciente</Button></div>
